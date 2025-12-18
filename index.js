@@ -1,18 +1,18 @@
 const express = require("express");
 const app = express();
 
-const message = process.env.APP_MESSAGE || "CI/CD Pipeline is working 🚀";
-
+// Root route (reads env var at request time)
 app.get("/", (req, res) => {
-  res.send(message);
+  res.send(process.env.APP_MESSAGE || "CI/CD Pipeline is working 🚀");
 });
 
-// 👇 THIS creates the /env-check URL
-app.get("/env-check", (req, res) => {
-  res.json({
-    APP_MESSAGE: process.env.APP_MESSAGE || "NOT FOUND"
-  });
+// Health check route (good cloud practice)
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "UP" });
 });
 
+// Server start
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running"));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
