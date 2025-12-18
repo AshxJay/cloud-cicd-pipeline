@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("CI/CD Pipeline is working 🚀");
+  res.send("CI/CD update successful ✅");
 });
 
 const PORT = process.env.PORT || 3000;
