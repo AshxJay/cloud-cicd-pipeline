@@ -10,21 +10,21 @@ app.use(express.json());
 /* -------------------- DATABASE -------------------- */
 connectDB();
 
-/* -------------------- BASIC ROUTES -------------------- */
+/* -------------------- ROUTES -------------------- */
 
 // Root
 app.get("/", (req, res) => {
   res.send(process.env.APP_MESSAGE || "CI/CD Pipeline is working 🚀");
 });
 
-// Health check
+// Health
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "UP" });
 });
 
-/* -------------------- NOTES CRUD API -------------------- */
+/* -------------------- NOTES CRUD -------------------- */
 
-// CREATE note
+// CREATE (already working)
 app.post("/api/notes", async (req, res, next) => {
   try {
     const note = await Note.create(req.body);
@@ -34,7 +34,7 @@ app.post("/api/notes", async (req, res, next) => {
   }
 });
 
-// READ all notes
+// ✅ READ ALL (THIS FIXES YOUR ERROR)
 app.get("/api/notes", async (req, res, next) => {
   try {
     const notes = await Note.find();
@@ -44,7 +44,7 @@ app.get("/api/notes", async (req, res, next) => {
   }
 });
 
-// READ single note
+// READ ONE
 app.get("/api/notes/:id", async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id);
@@ -59,31 +59,31 @@ app.get("/api/notes/:id", async (req, res, next) => {
   }
 });
 
-// UPDATE note
+// UPDATE
 app.put("/api/notes/:id", async (req, res, next) => {
   try {
-    const updatedNote = await Note.findByIdAndUpdate(
+    const updated = await Note.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
 
-    if (!updatedNote) {
+    if (!updated) {
       return res.status(404).json({ error: "Note not found" });
     }
 
-    res.json(updatedNote);
+    res.json(updated);
   } catch (error) {
     next(error);
   }
 });
 
-// DELETE note
+// DELETE
 app.delete("/api/notes/:id", async (req, res, next) => {
   try {
-    const deletedNote = await Note.findByIdAndDelete(req.params.id);
+    const deleted = await Note.findByIdAndDelete(req.params.id);
 
-    if (!deletedNote) {
+    if (!deleted) {
       return res.status(404).json({ error: "Note not found" });
     }
 
@@ -93,9 +93,9 @@ app.delete("/api/notes/:id", async (req, res, next) => {
   }
 });
 
-/* -------------------- GLOBAL ERROR HANDLER -------------------- */
+/* -------------------- ERROR HANDLER -------------------- */
 app.use((err, req, res, next) => {
-  console.error(err.message);
+  console.error(err.stack);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
