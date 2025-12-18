@@ -1,0 +1,11 @@
+{
+  "name": "cloud-cicd-demo",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node index.js",
+    "build": "echo Build step completed"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
