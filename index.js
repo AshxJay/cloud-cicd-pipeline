@@ -4,25 +4,32 @@ const noteRoutes = require("./routes/noteRoutes");
 
 const app = express();
 
-/* -------------------- DATABASE -------------------- */
-connectDB();
-
 /* -------------------- MIDDLEWARE -------------------- */
 app.use(express.json());
 
-/* -------------------- ENV MESSAGE -------------------- */
-const message = process.env.APP_MESSAGE || "CI/CD Pipeline is working 🚀";
+/* -------------------- DATABASE -------------------- */
+connectDB();
 
 /* -------------------- ROUTES -------------------- */
+
+// Root
 app.get("/", (req, res) => {
-  res.send(message);
+  res.send(process.env.APP_MESSAGE || "CI/CD Pipeline is working 🚀");
 });
 
+// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "UP" });
 });
 
+// Notes API
 app.use("/api/notes", noteRoutes);
+
+/* -------------------- ERROR HANDLER (IMPORTANT) -------------------- */
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Internal Server Error" });
+});
 
 /* -------------------- SERVER -------------------- */
 const PORT = process.env.PORT || 3000;
