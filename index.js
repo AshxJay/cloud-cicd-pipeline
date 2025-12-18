@@ -8,7 +8,8 @@ const app = express();
 app.use(express.json());
 
 /* -------------------- DATABASE -------------------- */
-connectDB();
+connectDB().catch(console.error);
+
 
 /* -------------------- ROUTES -------------------- */
 
