@@ -10,13 +10,10 @@ const options = {
     },
     servers: [
       {
-        url: "https://cloud-cicd-pipeline.vercel.app/",
-        description: "Production server"
-      }
+        url: "https://cloud-cicd-pipeline.vercel.app/
     ]
   },
   apis: ["./index.js"]
-// where swagger reads comments from
 };
 
 const swaggerSpec = swaggerJsdoc(options);

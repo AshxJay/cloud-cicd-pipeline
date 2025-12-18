@@ -22,6 +22,10 @@ app.use(express.json());
 connectDB().catch(console.error);
 
 /* -------------------- SWAGGER DOCS -------------------- */
+/* 🔍 Debug line to confirm Swagger loaded */
+console.log("Swagger spec loaded:", !!swaggerSpec);
+
+/* Register Swagger route */
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /* -------------------- ROUTES -------------------- */
