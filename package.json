@@ -1,11 +1,19 @@
 {
   "name": "cloud-cicd-demo",
   "version": "1.0.0",
+  "description": "Cloud CI/CD demo with GitHub Actions and Vercel",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "lint": "eslint .",
     "build": "echo Build step completed"
   },
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0"
   }
 }
