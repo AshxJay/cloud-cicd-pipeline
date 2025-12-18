@@ -1,3 +1,5 @@
+console.log("SERVER FILE LOADED");
+
 const express = require("express");
 const connectDB = require("./db");
 const Note = require("./models/Note");
