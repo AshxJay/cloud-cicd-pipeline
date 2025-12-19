@@ -4,6 +4,8 @@ const Note = require("./models/Note");
 const AppError = require("./utils/AppError");
 const errorHandler = require("./middleware/errorHandler");
 const validateNote = require("./middleware/validateNote");
+const protect = require("./middleware/auth");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
@@ -25,10 +27,13 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "UP" });
 });
 
-/* -------------------- NOTES CRUD -------------------- */
+/* -------------------- AUTH ROUTES -------------------- */
+app.use("/api/auth", authRoutes);
 
-// CREATE (with validation)
-app.post("/api/notes", validateNote, async (req, res, next) => {
+/* -------------------- NOTES CRUD (PROTECTED) -------------------- */
+
+// CREATE (protected + validation)
+app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   try {
     const note = await Note.create(req.body);
     res.status(201).json(note);
@@ -37,8 +42,8 @@ app.post("/api/notes", validateNote, async (req, res, next) => {
   }
 });
 
-// READ ALL
-app.get("/api/notes", async (req, res, next) => {
+// READ ALL (protected)
+app.get("/api/notes", protect, async (req, res, next) => {
   try {
     const notes = await Note.find();
     res.status(200).json(notes);
@@ -47,8 +52,8 @@ app.get("/api/notes", async (req, res, next) => {
   }
 });
 
-// READ ONE
-app.get("/api/notes/:id", async (req, res, next) => {
+// READ ONE (protected)
+app.get("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id);
 
@@ -62,8 +67,8 @@ app.get("/api/notes/:id", async (req, res, next) => {
   }
 });
 
-// UPDATE (with validation)
-app.put("/api/notes/:id", validateNote, async (req, res, next) => {
+// UPDATE (protected + validation)
+app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
   try {
     const updated = await Note.findByIdAndUpdate(
       req.params.id,
@@ -81,8 +86,8 @@ app.put("/api/notes/:id", validateNote, async (req, res, next) => {
   }
 });
 
-// DELETE
-app.delete("/api/notes/:id", async (req, res, next) => {
+// DELETE (protected)
+app.delete("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const deleted = await Note.findByIdAndDelete(req.params.id);
 
