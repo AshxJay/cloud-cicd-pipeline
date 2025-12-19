@@ -21,10 +21,8 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🔐 HASH PASSWORD BEFORE SAVE
+// ✅ MUST be a normal function (NOT arrow)
 userSchema.pre("save", async function (next) {
-  console.log("🔥 PRE-SAVE HOOK RUNNING");
-
   if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 10);
