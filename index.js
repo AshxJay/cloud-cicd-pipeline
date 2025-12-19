@@ -1,6 +1,8 @@
 const express = require("express");
 const connectDB = require("./db");
 const Note = require("./models/Note");
+const AppError = require("./utils/AppError");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -8,7 +10,6 @@ const app = express();
 app.use(express.json());
 
 /* -------------------- DATABASE -------------------- */
-// IMPORTANT: connect once, reuse connection
 connectDB();
 
 /* -------------------- ROUTES -------------------- */
@@ -51,10 +52,10 @@ app.get("/api/notes/:id", async (req, res, next) => {
     const note = await Note.findById(req.params.id);
 
     if (!note) {
-      return res.status(404).json({ error: "Note not found" });
+      throw new AppError("Note not found", 404);
     }
 
-    res.json(note);
+    res.status(200).json(note);
   } catch (error) {
     next(error);
   }
@@ -70,10 +71,10 @@ app.put("/api/notes/:id", async (req, res, next) => {
     );
 
     if (!updated) {
-      return res.status(404).json({ error: "Note not found" });
+      throw new AppError("Note not found", 404);
     }
 
-    res.json(updated);
+    res.status(200).json(updated);
   } catch (error) {
     next(error);
   }
@@ -85,22 +86,22 @@ app.delete("/api/notes/:id", async (req, res, next) => {
     const deleted = await Note.findByIdAndDelete(req.params.id);
 
     if (!deleted) {
-      return res.status(404).json({ error: "Note not found" });
+      throw new AppError("Note not found", 404);
     }
 
-    res.json({ message: "Note deleted successfully" });
+    res.status(200).json({ message: "Note deleted successfully" });
   } catch (error) {
     next(error);
   }
 });
 
-/* -------------------- ERROR HANDLER -------------------- */
-app.use((err, req, res, next) => {
-  console.error("ERROR:", err.message);
-  res.status(500).json({
-    error: err.message || "Internal Server Error"
-  });
+/* -------------------- 404 HANDLER -------------------- */
+app.use((req, res, next) => {
+  next(new AppError(`Route ${req.originalUrl} not found`, 404));
 });
+
+/* -------------------- ERROR HANDLER -------------------- */
+app.use(errorHandler);
 
 /* -------------------- SERVER -------------------- */
 const PORT = process.env.PORT || 3000;
