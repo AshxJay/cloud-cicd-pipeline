@@ -6,7 +6,7 @@ const AppError = require("../utils/AppError");
 
 const router = express.Router();
 
-/* -------------------- REGISTER -------------------- */
+/* REGISTER */
 router.post("/register", async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -15,8 +15,8 @@ router.post("/register", async (req, res, next) => {
       return next(new AppError("All fields are required", 400));
     }
 
-    const exists = await User.findOne({ email });
-    if (exists) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return next(new AppError("User already exists", 400));
     }
 
@@ -30,14 +30,10 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
-/* -------------------- LOGIN -------------------- */
+/* LOGIN */
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return next(new AppError("Email and password required", 400));
-    }
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -55,7 +51,7 @@ router.post("/login", async (req, res, next) => {
       { expiresIn: "1d" }
     );
 
-    res.status(200).json({ token });
+    res.json({ token });
   } catch (err) {
     next(err);
   }
