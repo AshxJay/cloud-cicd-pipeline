@@ -7,18 +7,17 @@ const options = {
       title: "Cloud Notes API",
       version: "1.0.0",
       description:
-        "A cloud-hosted Notes API with JWT authentication, validation, and CI/CD"
+        "A cloud-hosted Notes API with JWT authentication, validation, CI/CD"
     },
+
+    // IMPORTANT: Same-origin server (works on Vercel & local)
     servers: [
       {
-        url: "http://localhost:3000",
-        description: "Local server"
-      },
-      {
-        url: "https://YOUR_VERCEL_URL",
-        description: "Production server"
+        url: "/",
+        description: "Same origin"
       }
     ],
+
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -28,12 +27,15 @@ const options = {
         }
       }
     },
+
     security: [
       {
         bearerAuth: []
       }
     ]
   },
+
+  // Swagger scans index.js for annotations
   apis: ["./index.js"]
 };
 
