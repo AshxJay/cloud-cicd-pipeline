@@ -1,7 +1,4 @@
 const express = require("express");
-const path = require("path");
-const swaggerUiDist = require("swagger-ui-dist");
-
 const connectDB = require("./db");
 const Note = require("./models/Note");
 const AppError = require("./utils/AppError");
@@ -9,8 +6,6 @@ const errorHandler = require("./middleware/errorHandler");
 const validateNote = require("./middleware/validateNote");
 const protect = require("./middleware/auth");
 const authRoutes = require("./routes/authRoutes");
-
-const swaggerSpec = require("./swagger");
 
 const app = express();
 
@@ -33,6 +28,8 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 
 /* -------------------- NOTES CRUD (PROTECTED) -------------------- */
+
+// CREATE
 app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   try {
     const note = await Note.create(req.body);
@@ -42,6 +39,7 @@ app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   }
 });
 
+// READ ALL
 app.get("/api/notes", protect, async (req, res, next) => {
   try {
     const notes = await Note.find();
@@ -51,16 +49,20 @@ app.get("/api/notes", protect, async (req, res, next) => {
   }
 });
 
+// READ ONE
 app.get("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id);
-    if (!note) return next(new AppError("Note not found", 404));
+    if (!note) {
+      return next(new AppError("Note not found", 404));
+    }
     res.json(note);
   } catch (err) {
     next(err);
   }
 });
 
+// UPDATE
 app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
   try {
     const updated = await Note.findByIdAndUpdate(
@@ -68,60 +70,30 @@ app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
       req.body,
       { new: true, runValidators: true }
     );
-    if (!updated) return next(new AppError("Note not found", 404));
+
+    if (!updated) {
+      return next(new AppError("Note not found", 404));
+    }
+
     res.json(updated);
   } catch (err) {
     next(err);
   }
 });
 
+// DELETE
 app.delete("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const deleted = await Note.findByIdAndDelete(req.params.id);
-    if (!deleted) return next(new AppError("Note not found", 404));
+
+    if (!deleted) {
+      return next(new AppError("Note not found", 404));
+    }
+
     res.json({ message: "Note deleted successfully" });
   } catch (err) {
     next(err);
   }
-});
-
-/* -------------------- SWAGGER -------------------- */
-const swaggerUiPath = swaggerUiDist.getAbsoluteFSPath();
-
-app.use("/api-docs", express.static(swaggerUiPath));
-
-app.get("/api-docs/swagger.json", (req, res) => {
-  res.json(swaggerSpec);
-});
-
-app.get("/api-docs", (req, res) => {
-  res.send(`
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Swagger UI</title>
-  <link rel="stylesheet" href="/api-docs/swagger-ui.css" />
-</head>
-<body>
-  <div id="swagger-ui"></div>
-  <script src="/api-docs/swagger-ui-bundle.js"></script>
-  <script src="/api-docs/swagger-ui-standalone-preset.js"></script>
-  <script>
-    window.onload = function () {
-      SwaggerUIBundle({
-        url: "/api-docs/swagger.json",
-        dom_id: "#swagger-ui",
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        layout: "StandaloneLayout"
-      });
-    };
-  </script>
-</body>
-</html>
-  `);
 });
 
 /* -------------------- 404 HANDLER -------------------- */
