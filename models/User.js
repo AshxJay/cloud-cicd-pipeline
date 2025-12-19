@@ -21,12 +21,11 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ MUST be a normal function (NOT arrow)
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+// ✅ Mongoose v7+ async middleware (NO next)
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 module.exports = mongoose.model("User", userSchema);
