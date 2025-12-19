@@ -58,11 +58,6 @@ app.use("/api/auth", authRoutes);
  *     summary: Create a note
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *     responses:
- *       201:
- *         description: Note created
  */
 app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   try {
@@ -80,9 +75,6 @@ app.post("/api/notes", protect, validateNote, async (req, res, next) => {
  *     summary: Get all notes
  *     security:
  *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of notes
  */
 app.get("/api/notes", protect, async (req, res, next) => {
   try {
@@ -100,22 +92,11 @@ app.get("/api/notes", protect, async (req, res, next) => {
  *     summary: Get a single note
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *     responses:
- *       200:
- *         description: Note found
  */
 app.get("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id);
-
-    if (!note) {
-      throw new AppError("Note not found", 404);
-    }
-
+    if (!note) throw new AppError("Note not found", 404);
     res.status(200).json(note);
   } catch (error) {
     next(error);
@@ -129,13 +110,6 @@ app.get("/api/notes/:id", protect, async (req, res, next) => {
  *     summary: Update a note
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *     responses:
- *       200:
- *         description: Note updated
  */
 app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
   try {
@@ -144,11 +118,7 @@ app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
       req.body,
       { new: true, runValidators: true }
     );
-
-    if (!updated) {
-      throw new AppError("Note not found", 404);
-    }
-
+    if (!updated) throw new AppError("Note not found", 404);
     res.status(200).json(updated);
   } catch (error) {
     next(error);
@@ -162,30 +132,23 @@ app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
  *     summary: Delete a note
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *     responses:
- *       200:
- *         description: Note deleted
  */
 app.delete("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const deleted = await Note.findByIdAndDelete(req.params.id);
-
-    if (!deleted) {
-      throw new AppError("Note not found", 404);
-    }
-
+    if (!deleted) throw new AppError("Note not found", 404);
     res.status(200).json({ message: "Note deleted successfully" });
   } catch (error) {
     next(error);
   }
 });
 
-/* -------------------- SWAGGER UI -------------------- */
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+/* -------------------- SWAGGER UI (FIXED) -------------------- */
+/* Serve static swagger files */
+app.use("/api-docs", swaggerUi.serve);
+
+/* Serve swagger UI page */
+app.get("/api-docs", swaggerUi.setup(swaggerSpec));
 
 /* -------------------- 404 HANDLER -------------------- */
 app.use((req, res, next) => {
