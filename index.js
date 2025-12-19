@@ -3,6 +3,7 @@ const connectDB = require("./db");
 const Note = require("./models/Note");
 const AppError = require("./utils/AppError");
 const errorHandler = require("./middleware/errorHandler");
+const validateNote = require("./middleware/validateNote");
 
 const app = express();
 
@@ -26,8 +27,8 @@ app.get("/health", (req, res) => {
 
 /* -------------------- NOTES CRUD -------------------- */
 
-// CREATE
-app.post("/api/notes", async (req, res, next) => {
+// CREATE (with validation)
+app.post("/api/notes", validateNote, async (req, res, next) => {
   try {
     const note = await Note.create(req.body);
     res.status(201).json(note);
@@ -61,8 +62,8 @@ app.get("/api/notes/:id", async (req, res, next) => {
   }
 });
 
-// UPDATE
-app.put("/api/notes/:id", async (req, res, next) => {
+// UPDATE (with validation)
+app.put("/api/notes/:id", validateNote, async (req, res, next) => {
   try {
     const updated = await Note.findByIdAndUpdate(
       req.params.id,
