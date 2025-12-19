@@ -2,7 +2,7 @@ const express = require("express");
 const connectDB = require("./db");
 const Note = require("./models/Note");
 const AppError = require("./utils/AppError");
-const errorHandler = require("./middleware/errorHandler");
+const errorHandler = require("./middleware/errorhandler");
 const validateNote = require("./middleware/validateNote");
 const protect = require("./middleware/auth");
 const authRoutes = require("./routes/authRoutes");
@@ -15,11 +15,14 @@ app.use(express.json());
 /* -------------------- DATABASE -------------------- */
 connectDB();
 
-/* -------------------- BASIC ROUTES -------------------- */
+/* -------------------- ROUTES -------------------- */
+
+// Root
 app.get("/", (req, res) => {
   res.send(process.env.APP_MESSAGE || "CI/CD Pipeline is working 🚀");
 });
 
+// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "UP" });
 });
@@ -29,40 +32,42 @@ app.use("/api/auth", authRoutes);
 
 /* -------------------- NOTES CRUD (PROTECTED) -------------------- */
 
-// CREATE
+// CREATE (protected + validation)
 app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   try {
     const note = await Note.create(req.body);
     res.status(201).json(note);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 });
 
-// READ ALL
+// READ ALL (protected)
 app.get("/api/notes", protect, async (req, res, next) => {
   try {
     const notes = await Note.find();
-    res.json(notes);
-  } catch (err) {
-    next(err);
+    res.status(200).json(notes);
+  } catch (error) {
+    next(error);
   }
 });
 
-// READ ONE
+// READ ONE (protected)
 app.get("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id);
+
     if (!note) {
-      return next(new AppError("Note not found", 404));
+      throw new AppError("Note not found", 404);
     }
-    res.json(note);
-  } catch (err) {
-    next(err);
+
+    res.status(200).json(note);
+  } catch (error) {
+    next(error);
   }
 });
 
-// UPDATE
+// UPDATE (protected + validation)
 app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
   try {
     const updated = await Note.findByIdAndUpdate(
@@ -72,27 +77,27 @@ app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
     );
 
     if (!updated) {
-      return next(new AppError("Note not found", 404));
+      throw new AppError("Note not found", 404);
     }
 
-    res.json(updated);
-  } catch (err) {
-    next(err);
+    res.status(200).json(updated);
+  } catch (error) {
+    next(error);
   }
 });
 
-// DELETE
+// DELETE (protected)
 app.delete("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const deleted = await Note.findByIdAndDelete(req.params.id);
 
     if (!deleted) {
-      return next(new AppError("Note not found", 404));
+      throw new AppError("Note not found", 404);
     }
 
-    res.json({ message: "Note deleted successfully" });
-  } catch (err) {
-    next(err);
+    res.status(200).json({ message: "Note deleted successfully" });
+  } catch (error) {
+    next(error);
   }
 });
 
