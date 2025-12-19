@@ -33,8 +33,6 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 
 /* -------------------- NOTES CRUD (PROTECTED) -------------------- */
-
-// CREATE
 app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   try {
     const note = await Note.create(req.body);
@@ -44,7 +42,6 @@ app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   }
 });
 
-// READ ALL
 app.get("/api/notes", protect, async (req, res, next) => {
   try {
     const notes = await Note.find();
@@ -54,20 +51,16 @@ app.get("/api/notes", protect, async (req, res, next) => {
   }
 });
 
-// READ ONE
 app.get("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id);
-    if (!note) {
-      return next(new AppError("Note not found", 404));
-    }
+    if (!note) return next(new AppError("Note not found", 404));
     res.json(note);
   } catch (err) {
     next(err);
   }
 });
 
-// UPDATE
 app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
   try {
     const updated = await Note.findByIdAndUpdate(
@@ -75,45 +68,32 @@ app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
       req.body,
       { new: true, runValidators: true }
     );
-
-    if (!updated) {
-      return next(new AppError("Note not found", 404));
-    }
-
+    if (!updated) return next(new AppError("Note not found", 404));
     res.json(updated);
   } catch (err) {
     next(err);
   }
 });
 
-// DELETE
 app.delete("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const deleted = await Note.findByIdAndDelete(req.params.id);
-
-    if (!deleted) {
-      return next(new AppError("Note not found", 404));
-    }
-
+    if (!deleted) return next(new AppError("Note not found", 404));
     res.json({ message: "Note deleted successfully" });
   } catch (err) {
     next(err);
   }
 });
 
-/* -------------------- SWAGGER (VERCEL SAFE) -------------------- */
-
+/* -------------------- SWAGGER -------------------- */
 const swaggerUiPath = swaggerUiDist.getAbsoluteFSPath();
 
-// Serve Swagger UI static assets
 app.use("/api-docs", express.static(swaggerUiPath));
 
-// Serve Swagger spec
 app.get("/api-docs/swagger.json", (req, res) => {
   res.json(swaggerSpec);
 });
 
-// Serve Swagger UI HTML with injected config
 app.get("/api-docs", (req, res) => {
   res.send(`
 <!DOCTYPE html>
