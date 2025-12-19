@@ -7,6 +7,9 @@ const validateNote = require("./middleware/validateNote");
 const protect = require("./middleware/auth");
 const authRoutes = require("./routes/authRoutes");
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
+
 const app = express();
 
 /* -------------------- MIDDLEWARE -------------------- */
@@ -17,12 +20,28 @@ connectDB();
 
 /* -------------------- ROUTES -------------------- */
 
-// Root
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Root endpoint
+ *     responses:
+ *       200:
+ *         description: API running
+ */
 app.get("/", (req, res) => {
   res.send(process.env.APP_MESSAGE || "CI/CD Pipeline is working 🚀");
 });
 
-// Health check
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check
+ *     responses:
+ *       200:
+ *         description: API is healthy
+ */
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "UP" });
 });
@@ -32,7 +51,19 @@ app.use("/api/auth", authRoutes);
 
 /* -------------------- NOTES CRUD (PROTECTED) -------------------- */
 
-// CREATE (protected + validation)
+/**
+ * @swagger
+ * /api/notes:
+ *   post:
+ *     summary: Create a note
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *     responses:
+ *       201:
+ *         description: Note created
+ */
 app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   try {
     const note = await Note.create(req.body);
@@ -42,7 +73,17 @@ app.post("/api/notes", protect, validateNote, async (req, res, next) => {
   }
 });
 
-// READ ALL (protected)
+/**
+ * @swagger
+ * /api/notes:
+ *   get:
+ *     summary: Get all notes
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of notes
+ */
 app.get("/api/notes", protect, async (req, res, next) => {
   try {
     const notes = await Note.find();
@@ -52,7 +93,21 @@ app.get("/api/notes", protect, async (req, res, next) => {
   }
 });
 
-// READ ONE (protected)
+/**
+ * @swagger
+ * /api/notes/{id}:
+ *   get:
+ *     summary: Get a single note
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Note found
+ */
 app.get("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id);
@@ -67,7 +122,21 @@ app.get("/api/notes/:id", protect, async (req, res, next) => {
   }
 });
 
-// UPDATE (protected + validation)
+/**
+ * @swagger
+ * /api/notes/{id}:
+ *   put:
+ *     summary: Update a note
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Note updated
+ */
 app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
   try {
     const updated = await Note.findByIdAndUpdate(
@@ -86,7 +155,21 @@ app.put("/api/notes/:id", protect, validateNote, async (req, res, next) => {
   }
 });
 
-// DELETE (protected)
+/**
+ * @swagger
+ * /api/notes/{id}:
+ *   delete:
+ *     summary: Delete a note
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Note deleted
+ */
 app.delete("/api/notes/:id", protect, async (req, res, next) => {
   try {
     const deleted = await Note.findByIdAndDelete(req.params.id);
@@ -100,6 +183,9 @@ app.delete("/api/notes/:id", protect, async (req, res, next) => {
     next(error);
   }
 });
+
+/* -------------------- SWAGGER UI -------------------- */
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /* -------------------- 404 HANDLER -------------------- */
 app.use((req, res, next) => {
