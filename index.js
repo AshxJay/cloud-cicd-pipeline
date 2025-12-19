@@ -86,29 +86,52 @@ app.delete("/api/notes/:id", protect, async (req, res, next) => {
   }
 });
 
-/* -------------------- SWAGGER (VERCEL SAFE) -------------------- */
+/* -------------------- SWAGGER (FINAL FIXED) -------------------- */
 
-// Serve swagger-ui static files
-app.use(
-  "/api-docs",
-  express.static(swaggerUiDist.getAbsoluteFSPath())
-);
+const swaggerUiPath = swaggerUiDist.getAbsoluteFSPath();
 
-// Serve swagger spec
+// Serve Swagger UI assets
+app.use("/api-docs", express.static(swaggerUiPath));
+
+// Serve Swagger spec
 app.get("/api-docs/swagger.json", (req, res) => {
   res.json(swaggerSpec);
 });
 
-// Inject config
+// Inject Swagger config properly
 app.get("/api-docs", (req, res) => {
-  res.sendFile(
-    path.join(swaggerUiDist.getAbsoluteFSPath(), "index.html")
-  );
+  res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Swagger UI</title>
+  <link rel="stylesheet" href="/api-docs/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="/api-docs/swagger-ui-bundle.js"></script>
+  <script src="/api-docs/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = () => {
+      SwaggerUIBundle({
+        url: "/api-docs/swagger.json",
+        dom_id: "#swagger-ui",
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "StandaloneLayout"
+      });
+    };
+  </script>
+</body>
+</html>
+  `);
 });
 
 /* -------------------- 404 HANDLER -------------------- */
 app.use((req, res, next) => {
-  next(new AppError(`Route ${req.originalUrl} not found`, 404));
+  next(new AppError(\`Route \${req.originalUrl} not found\`, 404));
 });
 
 /* -------------------- ERROR HANDLER -------------------- */
@@ -117,5 +140,5 @@ app.use(errorHandler);
 /* -------------------- SERVER -------------------- */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(\`Server running on port \${PORT}\`);
 });
