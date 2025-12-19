@@ -143,12 +143,8 @@ app.delete("/api/notes/:id", protect, async (req, res, next) => {
   }
 });
 
-/* -------------------- SWAGGER UI (FIXED) -------------------- */
-/* Serve static swagger files */
-app.use("/api-docs", swaggerUi.serve);
-
-/* Serve swagger UI page */
-app.get("/api-docs", swaggerUi.setup(swaggerSpec));
+/* -------------------- SWAGGER UI (CORRECT) -------------------- */
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /* -------------------- 404 HANDLER -------------------- */
 app.use((req, res, next) => {
